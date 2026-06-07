@@ -20,13 +20,13 @@ import com.microservices.entities.User;
 import com.microservices.services.UserService;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 
 @RestController
 @RequestMapping("/users")
 public class UserController {
     @Autowired
     private UserService userService;
-
     
     
     
@@ -39,7 +39,8 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    @CircuitBreaker(name="ratingHotelBreaker",fallbackMethod = "ratingHotelFallback")
+    //@CircuitBreaker(name="ratingHotelBreaker",fallbackMethod = "ratingHotelFallback")
+     @Retry(name = "ratingHotelService",fallbackMethod = "ratingHotelFallback")
     public ResponseEntity<User> getSingleUser(@PathVariable String userId)
     {
        User user = userService.getUser(userId);
@@ -52,11 +53,13 @@ public class UserController {
         User user = User.builder().email("dummy@gmail.com").name("Dummy").about("Since service is down hence a dummy user is provided to inform.").userId("404").build();
         return new ResponseEntity<User>(user,HttpStatus.OK);
     }
-
+    
     @GetMapping
-    @CircuitBreaker(name="ratingHotelBreaker",fallbackMethod = "ratingHotelFallback2")
+    //@CircuitBreaker(name="ratingHotelBreaker",fallbackMethod = "ratingHotelFallback2")
+     @Retry(name = "ratingHotelService",fallbackMethod = "ratingHotelFallback2")
     public ResponseEntity<List<User>> getAllUsers()
     {
+        
         List<User> users = userService.getAllUser();
         return ResponseEntity.ok(users);
     }
